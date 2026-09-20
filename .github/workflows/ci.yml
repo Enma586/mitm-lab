@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  # ---------------------------------------------------------------------
+  # Compila cada app Node (type-check + build). No levanta ninguna VM:
+  # eso necesitaria virtualizacion anidada, que un runner de GitHub no
+  # ofrece. Lo que si podemos garantizar en CI es que el codigo compila.
+  # ---------------------------------------------------------------------
+  build:
+    name: build (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [server, client, dashboard]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: ${{ matrix.project }}
+        run: npm ci
+
+      - name: Build
+        working-directory: ${{ matrix.project }}
+        run: npm run build
+
+  # ---------------------------------------------------------------------
+  # Construye la imagen Docker de cada app: es exactamente lo que
+  # ansible/*.yml corre dentro de cada VM (docker build), asi que esto
+  # valida los Dockerfiles sin necesitar las VMs.
+  # ---------------------------------------------------------------------
+  docker-build:
+    name: docker build (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [server, client, dashboard]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build de la imagen
+        run: docker build -t mitm-lab-${{ matrix.project }}:ci ./${{ matrix.project }}
+
+  # ---------------------------------------------------------------------
+  # Chequeos estaticos de lo que corre fuera de Node: el Vagrantfile,
+  # los playbooks de Ansible, el script de ataque y el addon de mitmproxy.
+  # ---------------------------------------------------------------------
+  lint-infra:
+    name: lint (vagrant/ansible/scripts)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sintaxis del Vagrantfile (Ruby)
+        run: ruby -c Vagrantfile
+
+      - name: Instalar Ansible
+        run: pip install --disable-pip-version-check ansible-core
+
+      - name: Sintaxis de los playbooks
+        run: |
+          for playbook in ansible/*.yml; do
+            echo "== $playbook =="
+            ansible-playbook --syntax-check -i localhost, "$playbook"
+          done
+
+      - name: Shellcheck de start-attack.sh
+        run: shellcheck scripts/start-attack.sh
+
+      - name: Sintaxis de mitm_bridge.py
+        run: python3 -m py_compile scripts/mitm_bridge.py
