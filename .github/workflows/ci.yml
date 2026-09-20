@@ -76,6 +76,12 @@ jobs:
       - name: Instalar Ansible
         run: pip install --disable-pip-version-check ansible-core
 
+      - name: Instalar colecciones de Ansible usadas por los playbooks
+        # sysctl (kali.yml) vive en ansible.posix, no en ansible-core.
+        # Vagrant no lo sufre porque install_mode = "pip" instala el
+        # paquete "ansible" completo, que ya trae esta coleccion.
+        run: ansible-galaxy collection install ansible.posix
+
       - name: Sintaxis de los playbooks
         run: |
           for playbook in ansible/*.yml; do
