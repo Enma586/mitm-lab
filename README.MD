@@ -2,12 +2,11 @@
 
 Laboratorio reproducible para demostrar un ataque Man-in-the-Middle de forma
 controlada. Las 3 VMs, la red interna y el software se levantan con un solo
-comando desde este repositorio. Ver [roadmap.md](./roadmap.md) para el plan
-completo de fases.
+comando desde este repositorio.
 
-> Alcance de este entregable: fases 0 a 5 del roadmap (infraestructura, apps,
-> verificacion y escenario de ataque). La Fase 6 (dashboard en React que
-> muestra el ataque en vivo) queda pendiente para una siguiente etapa.
+> Alcance de este entregable: infraestructura, apps y escenario de ataque
+> completos. El dashboard en React que muestra el ataque en vivo queda
+> pendiente para una siguiente etapa.
 
 ## Arquitectura
 
@@ -41,7 +40,7 @@ Todo el disco y el estado de las maquinas virtuales vive en `D:\VM`, no en
 Si abres una terminal nueva en otra maquina del equipo, hay que repetir esos
 dos pasos antes de correr `vagrant up` (o exportar `VAGRANT_HOME` a mano).
 
-## Fase 0 - Prerrequisitos
+## Prerrequisitos
 
 En este equipo ya estan instalados:
 
@@ -99,7 +98,7 @@ vagrant snapshot save client client-listo
 vagrant snapshot save kali kali-listo
 ```
 
-## Fase 4 - Verificacion
+## Verificacion
 
 - `vagrant up` levanta las 3 VMs sin errores.
 - Desde tu navegador (o desde `client`): `http://192.168.56.10` abre la app.
@@ -107,7 +106,7 @@ vagrant snapshot save kali kali-listo
   `{"status":"ok"}`.
 - Desde `kali`: `ping 192.168.56.10` y `ping 192.168.56.20` responden.
 
-## Fase 5 - Escenario de ataque
+## Escenario de ataque
 
 1. Desde el navegador entra a `http://192.168.56.10` y haz login con el
    usuario de prueba: `victima` / `password123`.
@@ -151,7 +150,7 @@ mitm-lab/
 │       ├── services/        # AuthService, ProfileService (interfaces + HTTP)
 │       ├── context/         # AuthContext (estado global de sesion)
 │       └── pages/           # LoginPage, HomePage
-├── dashboard/                # pendiente (Fase 6, no incluido en este entregable)
+├── dashboard/                # pendiente (no incluido en este entregable)
 └── scripts/
     └── start-attack.sh      # arpspoof + captura, para correr en Kali
 ```
