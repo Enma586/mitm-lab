@@ -1,5 +1,8 @@
 roadmap.md
 
+# Referencias de diseno (mockups, capturas de inspiracion) - no son parte del codigo
+/ejemplo/
+
 # Vagrant / VirtualBox
 .vagrant/
 *.log
