@@ -22,6 +22,8 @@
           - mitmproxy
           - tcpdump
           - net-tools
+          - iptables
+          - curl
         state: present
 
     - name: Permitir captura de paquetes sin sudo (grupo wireshark)
