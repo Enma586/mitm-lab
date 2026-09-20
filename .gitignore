@@ -1,2 +1,20 @@
-
 roadmap.md
+
+# Vagrant / VirtualBox
+.vagrant/
+*.log
+
+# Node
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# Capturas del ataque (pueden contener credenciales de prueba)
+scripts/captures/
+*.pcap
+*.flow
+
+# Entorno
+.env
+.env.local
