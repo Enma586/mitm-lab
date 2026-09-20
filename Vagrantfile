@@ -37,6 +37,13 @@ Vagrant.configure("2") do |config|
       # NIC virtio en vez del e1000 por defecto: con Hyper-V/WSL2 activo
       # en el host, el e1000 emulado se cuelga apenas arranca la red.
       vb.customize ["modifyvm", :id, "--nictype1", "virtio", "--nictype2", "virtio"]
+      # El log de VirtualBox confirma "VT-x is not available": Windows le
+      # tiene tomado el VT-x a Hyper-V/WSL2, asi que la VM en realidad
+      # corre sobre el motor NEM (Hyper-V), no KVM. Decirle al kernel
+      # invitado que use el proveedor de paravirtualizacion "hyperv" (en
+      # vez del "kvm" por defecto) evita el desajuste de reloj/hypercalls
+      # que cuelga el arranque bajo este esquema.
+      vb.customize ["modifyvm", :id, "--paravirtprovider", "hyperv"]
     end
 
     server.vm.provision "ansible_local" do |ansible|
@@ -59,6 +66,7 @@ Vagrant.configure("2") do |config|
       vb.memory = 1536
       vb.cpus = 1
       vb.customize ["modifyvm", :id, "--nictype1", "virtio", "--nictype2", "virtio"]
+      vb.customize ["modifyvm", :id, "--paravirtprovider", "hyperv"]
     end
 
     client.vm.provision "ansible_local" do |ansible|
@@ -84,6 +92,7 @@ Vagrant.configure("2") do |config|
       # pero se deja headless off por si se quiere abrir la GUI de Wireshark.
       vb.gui = false
       vb.customize ["modifyvm", :id, "--nictype1", "virtio", "--nictype2", "virtio"]
+      vb.customize ["modifyvm", :id, "--paravirtprovider", "hyperv"]
     end
 
     kali.vm.provision "ansible_local" do |ansible|
