@@ -1,0 +1,52 @@
+---
+# Playbook KALI
+# Instala herramientas nativas de ataque (sin Docker: necesitan acceso
+# crudo a la interfaz de red) y prepara la VM para actuar como
+# man-in-the-middle entre client (192.168.56.10) y server (192.168.56.20).
+
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Actualizar cache de apt
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Instalar herramientas de ataque
+      apt:
+        name:
+          - dsniff # arpspoof
+          - wireshark
+          - tshark
+          - mitmproxy
+          - tcpdump
+          - net-tools
+        state: present
+
+    - name: Permitir captura de paquetes sin sudo (grupo wireshark)
+      user:
+        name: vagrant
+        groups: wireshark
+        append: true
+
+    - name: Habilitar reenvio de paquetes IPv4 (necesario para el MITM)
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: "1"
+        state: present
+        sysctl_set: true
+        reload: true
+
+    - name: Dar permiso de ejecucion al script de ataque
+      file:
+        path: /vagrant/scripts/start-attack.sh
+        mode: "0755"
+
+    - name: Crear carpeta de capturas
+      file:
+        path: /home/vagrant/captures
+        state: directory
+        owner: vagrant
+        group: vagrant
+        mode: "0755"
