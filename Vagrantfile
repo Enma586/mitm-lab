@@ -17,6 +17,11 @@ VM_NETWORK = "192.168.56"
 Vagrant.configure("2") do |config|
   config.vm.box_check_update = false
 
+  # Le da mas margen al arranque: bajo Windows con Hyper-V/WSL2 activo,
+  # VirtualBox corre las VMs sobre el Windows Hypervisor Platform, que
+  # puede ser bastante mas lento que la virtualizacion nativa.
+  config.vm.boot_timeout = 600
+
   # ---------------------------------------------------------------------
   # SERVER - backend Express (hexagonal), expone la API por HTTP en :4000
   # ---------------------------------------------------------------------
@@ -29,6 +34,9 @@ Vagrant.configure("2") do |config|
       vb.name = "mitm-lab-server"
       vb.memory = 2048
       vb.cpus = 2
+      # NIC virtio en vez del e1000 por defecto: con Hyper-V/WSL2 activo
+      # en el host, el e1000 emulado se cuelga apenas arranca la red.
+      vb.customize ["modifyvm", :id, "--nictype1", "virtio", "--nictype2", "virtio"]
     end
 
     server.vm.provision "ansible_local" do |ansible|
@@ -50,6 +58,7 @@ Vagrant.configure("2") do |config|
       vb.name = "mitm-lab-client"
       vb.memory = 1536
       vb.cpus = 1
+      vb.customize ["modifyvm", :id, "--nictype1", "virtio", "--nictype2", "virtio"]
     end
 
     client.vm.provision "ansible_local" do |ansible|
@@ -74,6 +83,7 @@ Vagrant.configure("2") do |config|
       # Kali trae escritorio; para el ataque por consola no hace falta,
       # pero se deja headless off por si se quiere abrir la GUI de Wireshark.
       vb.gui = false
+      vb.customize ["modifyvm", :id, "--nictype1", "virtio", "--nictype2", "virtio"]
     end
 
     kali.vm.provision "ansible_local" do |ansible|
