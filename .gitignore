@@ -12,6 +12,9 @@ node_modules/
 dist/
 build/
 *.tsbuildinfo
+.vite/
+vite.config.js
+vite.config.d.ts
 
 # Capturas del ataque (pueden contener credenciales de prueba)
 scripts/captures/

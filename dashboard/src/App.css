@@ -1,0 +1,12 @@
+.bottom-row {
+  display: grid;
+  grid-template-columns: 0.8fr 1.4fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .bottom-row {
+    grid-template-columns: 1fr;
+  }
+}

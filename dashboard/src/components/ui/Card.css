@@ -1,0 +1,45 @@
+.card {
+  background-color: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.card--accent {
+  background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+  border: none;
+  color: #1a0f00;
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.card__title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.card--accent .card__title {
+  color: #1a0f00;
+}
+
+.card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}

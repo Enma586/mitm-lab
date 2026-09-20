@@ -1,0 +1,9 @@
+.findings__list {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.findings__empty {
+  padding: 1rem 0;
+  font-size: 0.9rem;
+}

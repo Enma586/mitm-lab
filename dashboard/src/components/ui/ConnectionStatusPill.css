@@ -1,0 +1,31 @@
+.connection-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: var(--panel-alt);
+  border: 1px solid var(--border);
+}
+
+.connection-pill__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--text-faint);
+}
+
+.connection-pill--open .connection-pill__dot {
+  background-color: var(--success);
+  box-shadow: 0 0 6px var(--success);
+}
+
+.connection-pill--connecting .connection-pill__dot {
+  background-color: var(--warning);
+}
+
+.connection-pill--closed .connection-pill__dot {
+  background-color: var(--danger);
+}

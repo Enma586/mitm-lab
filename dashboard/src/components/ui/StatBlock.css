@@ -1,0 +1,29 @@
+.stat-block {
+  display: flex;
+  align-items: stretch;
+  gap: 0.65rem;
+  background-color: var(--panel-alt);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+}
+
+.stat-block__bar {
+  width: 3px;
+  border-radius: 999px;
+}
+
+.stat-block__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stat-block__label {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.stat-block__value {
+  font-size: 1.05rem;
+  font-weight: 600;
+}

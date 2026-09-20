@@ -1,0 +1,44 @@
+.radial-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.radial-gauge__svg {
+  width: 100%;
+  max-width: 240px;
+}
+
+.radial-gauge__track {
+  stroke: var(--panel-alt);
+}
+
+.radial-gauge__readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -2.5rem;
+}
+
+.radial-gauge__value {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.radial-gauge__max {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.radial-gauge__label {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.radial-gauge__sublabel {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-align: center;
+}
