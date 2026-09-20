@@ -1,4 +1,3 @@
-import { TopNav } from "./components/layout/TopNav";
 import { PageShell } from "./components/layout/PageShell";
 import { OverviewSection } from "./features/overview/OverviewSection";
 import { HostsSection } from "./features/hosts/HostsSection";
@@ -20,11 +19,10 @@ const eventsService = new HttpEventsService(env.apiBaseUrl);
 const realtimeSource = new WebSocketEventSource(env.wsUrl);
 
 export function App() {
-  const { events, status, refetch } = useAttackEvents(eventsService, realtimeSource);
+  const { events, refetch } = useAttackEvents(eventsService, realtimeSource);
 
   return (
     <PageShell>
-      <TopNav status={status} />
       <OverviewSection events={events} onRefresh={refetch} />
       <HostsSection events={events} />
       <DistributionSection events={events} />
