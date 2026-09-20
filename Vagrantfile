@@ -98,7 +98,11 @@ Vagrant.configure("2") do |config|
     kali.vm.provision "ansible_local" do |ansible|
       ansible.playbook = "ansible/kali.yml"
       ansible.provisioning_path = "/vagrant"
-      ansible.install_mode = "pip"
+      # Kali (Debian trixie) marca el Python del sistema como "externally
+      # managed" (PEP 668) y rechaza el pip install que hace get-pip.py.
+      # Este install_mode le pasa --break-system-packages solo para
+      # instalar Ansible dentro de la VM (no afecta a tu maquina).
+      ansible.install_mode = "pip_args_with_break_system_packages"
     end
   end
 end
