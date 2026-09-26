@@ -12,12 +12,14 @@
 .event-row__marker {
   width: 3px;
   border-radius: 999px;
-  background-color: var(--border);
   flex-shrink: 0;
 }
 
-.event-row--sensitive .event-row__marker {
-  background-color: var(--danger);
+.event-row--sensitive {
+  background-color: rgba(239, 68, 68, 0.06);
+  border-radius: var(--radius-sm);
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
 }
 
 .event-row__content {

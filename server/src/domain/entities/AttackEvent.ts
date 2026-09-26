@@ -9,7 +9,8 @@ export type AttackEventType =
   | "attack-stopped"
   | "http-credentials"
   | "http-request"
-  | "token-replay";
+  | "token-replay"
+  | "transfer-intercepted";
 
 export interface AttackEvent {
   id: string;

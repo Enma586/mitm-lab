@@ -5,14 +5,17 @@ import { Sha256PasswordHasher } from "./infrastructure/security/Sha256PasswordHa
 import { InMemoryTokenService } from "./infrastructure/security/InMemoryTokenService";
 import { InMemoryUserRepository } from "./infrastructure/repositories/InMemoryUserRepository";
 import { InMemoryEventStore } from "./infrastructure/repositories/InMemoryEventStore";
+import { InMemoryAccountRepository } from "./infrastructure/repositories/InMemoryAccountRepository";
 import { WebSocketEventPublisher } from "./infrastructure/realtime/WebSocketEventPublisher";
 import { LoginUseCase } from "./application/use-cases/LoginUseCase";
 import { GetProfileUseCase } from "./application/use-cases/GetProfileUseCase";
 import { IngestAttackEventUseCase } from "./application/use-cases/IngestAttackEventUseCase";
 import { ListRecentEventsUseCase } from "./application/use-cases/ListRecentEventsUseCase";
+import { TransferUseCase } from "./application/use-cases/TransferUseCase";
 import { AuthController } from "./infrastructure/http/controllers/AuthController";
 import { ProfileController } from "./infrastructure/http/controllers/ProfileController";
 import { EventsController } from "./infrastructure/http/controllers/EventsController";
+import { TransferController } from "./infrastructure/http/controllers/TransferController";
 import { createApp } from "./infrastructure/http/app";
 
 /**
@@ -26,13 +29,16 @@ function bootstrap(): void {
   const tokenService = new InMemoryTokenService();
   const userRepository = new InMemoryUserRepository(passwordHasher);
   const eventStore = new InMemoryEventStore();
+  const accountRepository = new InMemoryAccountRepository();
 
   const loginUseCase = new LoginUseCase(userRepository, passwordHasher, tokenService);
   const getProfileUseCase = new GetProfileUseCase(userRepository, tokenService);
   const listRecentEvents = new ListRecentEventsUseCase(eventStore);
+  const transferUseCase = new TransferUseCase(accountRepository);
 
   const authController = new AuthController(loginUseCase);
   const profileController = new ProfileController(getProfileUseCase);
+  const transferController = new TransferController(transferUseCase);
 
   // El servidor HTTP se crea vacio primero para poder colgar el
   // WebSocketServer del mismo puerto (ruta /ws/events) antes de que
@@ -44,7 +50,7 @@ function bootstrap(): void {
   const ingestAttackEvent = new IngestAttackEventUseCase(eventStore, eventPublisher);
   const eventsController = new EventsController(ingestAttackEvent, listRecentEvents);
 
-  const app = createApp(authController, profileController, eventsController);
+  const app = createApp(authController, profileController, eventsController, transferController);
   httpServer.on("request", app);
 
   httpServer.listen(env.port, () => {

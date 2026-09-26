@@ -1,0 +1,28 @@
+.transfers__grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.transfers__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.transfers__chart-header {
+  font-size: 0.85rem;
+}
+
+.transfers__chart-header h2 {
+  font-size: 1.6rem;
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 860px) {
+  .transfers__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -3,6 +3,7 @@ import cors from "cors";
 import { AuthController } from "./controllers/AuthController";
 import { ProfileController } from "./controllers/ProfileController";
 import { EventsController } from "./controllers/EventsController";
+import { TransferController } from "./controllers/TransferController";
 import { buildRouter } from "./routes/buildRouter";
 import { env } from "../config/env";
 
@@ -14,14 +15,15 @@ import { env } from "../config/env";
 export function createApp(
   authController: AuthController,
   profileController: ProfileController,
-  eventsController: EventsController
+  eventsController: EventsController,
+  transferController: TransferController
 ): Express {
   const app = express();
 
   app.use(cors({ origin: env.corsOrigin }));
   app.use(express.json());
 
-  app.use(buildRouter(authController, profileController, eventsController));
+  app.use(buildRouter(authController, profileController, eventsController, transferController));
 
   return app;
 }

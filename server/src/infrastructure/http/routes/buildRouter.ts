@@ -2,6 +2,7 @@ import { Router } from "express";
 import { AuthController } from "../controllers/AuthController";
 import { ProfileController } from "../controllers/ProfileController";
 import { EventsController } from "../controllers/EventsController";
+import { TransferController } from "../controllers/TransferController";
 
 /**
  * Ensambla las rutas HTTP con los controladores ya construidos.
@@ -11,7 +12,8 @@ import { EventsController } from "../controllers/EventsController";
 export function buildRouter(
   authController: AuthController,
   profileController: ProfileController,
-  eventsController: EventsController
+  eventsController: EventsController,
+  transferController: TransferController
 ): Router {
   const router = Router();
 
@@ -21,6 +23,7 @@ export function buildRouter(
 
   router.post("/api/login", authController.login);
   router.get("/api/profile", profileController.me);
+  router.post("/api/transfer", transferController.transfer);
 
   router.post("/api/events", eventsController.ingest);
   router.get("/api/events", eventsController.list);

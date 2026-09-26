@@ -138,6 +138,30 @@ vagrant snapshot restore server server-listo
 Para detener el ataque: `Ctrl+C` en la sesion donde corre el script (limpia
 el ARP spoofing automaticamente).
 
+## Escenario de transferencia (Fase 7)
+
+Ademas del login, el backend expone `POST /api/transfer` para simular una
+transferencia entre dos cuentas de prueba en memoria (`acc-alice`,
+`acc-bob`, saldo inicial 1000/500) y tener trafico interesante que
+interceptar mas alla de las credenciales:
+
+```
+curl -X POST http://192.168.56.20:4000/api/transfer \
+  -H "Content-Type: application/json" \
+  -d '{"fromAccountId":"acc-alice","toAccountId":"acc-bob","amount":100}'
+```
+
+Responde `{ fromAccountId, toAccountId, amount, fromBalance, toBalance }`, o
+un `400` si falta algun campo, las cuentas son la misma, no existen, o el
+saldo no alcanza.
+
+Con el ataque de la seccion anterior corriendo, `mitm_bridge.py` reconoce
+este endpoint y espera tambien la respuesta (no solo el request) para
+mandar un evento `transfer-intercepted` con el monto y los saldos
+resultantes, todo interceptado en texto plano. En el dashboard esto se ve
+en la seccion **Transferencias**: cantidad de transferencias capturadas,
+monto total acumulado y su evolucion en el tiempo.
+
 ## Dashboard en vivo
 
 El dashboard corre en tu propia maquina (no dentro de una VM), y se conecta
@@ -181,7 +205,7 @@ mitm-lab/
 │       ├── domain/          # tipo AttackEvent + selectors.ts (funciones puras)
 │       ├── services/        # EventsService (REST) y RealtimeEventSource (WebSocket)
 │       ├── components/ui/   # Card, LineChart, RadialGauge, etc. - todo propio, sin librerias
-│       └── features/        # Resumen, Hosts, Distribucion, Exposicion, Hallazgos
+│       └── features/        # Resumen, Hosts, Distribucion, Transferencias, Exposicion, Hallazgos
 └── scripts/
     ├── start-attack.sh      # arpspoof + iptables + mitmproxy transparente, para correr en Kali
     └── mitm_bridge.py       # addon de mitmproxy: manda lo interceptado a POST /api/events
