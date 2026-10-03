@@ -143,24 +143,25 @@ el ARP spoofing automaticamente).
 Ademas del login, el backend expone `POST /api/transfer` para simular una
 transferencia entre dos cuentas de prueba en memoria (`acc-alice`,
 `acc-bob`, saldo inicial 1000/500) y tener trafico interesante que
-interceptar mas alla de las credenciales:
+interceptar mas alla de las credenciales.
 
-```
-curl -X POST http://192.168.56.20:4000/api/transfer \
-  -H "Content-Type: application/json" \
-  -d '{"fromAccountId":"acc-alice","toAccountId":"acc-bob","amount":100}'
-```
+Para dispararla, nada de `curl`: una vez logueado en la app (`http://
+192.168.56.10` desde el navegador), la pantalla de inicio tiene un
+formulario **"Transferir fondos"** (elegir cuenta origen, cuenta destino,
+monto). El navegador manda el `POST /api/transfer` como trafico real, igual
+que el login por el formulario de la pantalla anterior.
 
 Responde `{ fromAccountId, toAccountId, amount, fromBalance, toBalance }`, o
 un `400` si falta algun campo, las cuentas son la misma, no existen, o el
-saldo no alcanza.
+saldo no alcanza (el formulario lo muestra como banner verde/rojo).
 
 Con el ataque de la seccion anterior corriendo, `mitm_bridge.py` reconoce
 este endpoint y espera tambien la respuesta (no solo el request) para
 mandar un evento `transfer-intercepted` con el monto y los saldos
 resultantes, todo interceptado en texto plano. En el dashboard esto se ve
 en la seccion **Transferencias**: cantidad de transferencias capturadas,
-monto total acumulado y su evolucion en el tiempo.
+monto total acumulado, su evolucion en el tiempo, y un diagrama de flujo
+(origen -> monto -> destino) por cada transferencia interceptada.
 
 ## Dashboard en vivo
 

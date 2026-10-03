@@ -26,3 +26,14 @@
     grid-template-columns: 1fr;
   }
 }
+
+.transfers__flows {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.transfers__flows-title {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
