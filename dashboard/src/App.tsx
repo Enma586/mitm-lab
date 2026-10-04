@@ -2,6 +2,7 @@ import { PageShell } from "./components/layout/PageShell";
 import { OverviewSection } from "./features/overview/OverviewSection";
 import { HostsSection } from "./features/hosts/HostsSection";
 import { DistributionSection } from "./features/distribution/DistributionSection";
+import { TransfersSection } from "./features/transfers/TransfersSection";
 import { ExposureSection } from "./features/exposure/ExposureSection";
 import { FindingsSection } from "./features/findings/FindingsSection";
 import { useAttackEvents } from "./hooks/useAttackEvents";
@@ -26,6 +27,7 @@ export function App() {
       <OverviewSection events={events} onRefresh={refetch} />
       <HostsSection events={events} />
       <DistributionSection events={events} />
+      <TransfersSection events={events} />
       <section id="hallazgos" className="bottom-row">
         <ExposureSection events={events} />
         <FindingsSection events={events} />

@@ -1,0 +1,41 @@
+.transfer-flow-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.transfer-flow-card:last-child {
+  border-bottom: none;
+}
+
+.transfer-flow-card__diagram {
+  width: 220px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.transfer-flow-card__amount {
+  fill: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.transfer-flow-card__initials {
+  fill: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.transfer-flow-card__label {
+  font-size: 9px;
+}
+
+.transfer-flow-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  min-width: 0;
+}

@@ -46,6 +46,15 @@ def _client_ip(flow: http.HTTPFlow) -> str:
     return peer[0] if peer else "desconocido"
 
 
+def _response_text(flow: http.HTTPFlow) -> str:
+    if flow.response is None:
+        return ""
+    try:
+        return flow.response.get_text() or ""
+    except ValueError:
+        return ""
+
+
 def request(flow: http.HTTPFlow) -> None:
     source_ip = _client_ip(flow)
     target_ip = flow.request.host
@@ -83,6 +92,12 @@ def request(flow: http.HTTPFlow) -> None:
             )
             return
 
+    if flow.request.method == "POST" and flow.request.path.startswith("/api/transfer"):
+        # No mandamos el evento todavia: esperamos a la respuesta
+        # (response()) para saber si la transferencia se completo y
+        # con que saldos, no solo lo que pidio el cliente.
+        return
+
     _send_async(
         {
             "type": "http-request",
@@ -90,5 +105,44 @@ def request(flow: http.HTTPFlow) -> None:
             "targetIp": target_ip,
             "summary": f"{flow.request.method} {flow.request.path}",
             "detail": {"method": flow.request.method, "path": flow.request.path},
+        }
+    )
+
+
+def response(flow: http.HTTPFlow) -> None:
+    if not (flow.request.method == "POST" and flow.request.path.startswith("/api/transfer")):
+        return
+
+    source_ip = _client_ip(flow)
+    target_ip = flow.request.host
+
+    try:
+        request_payload = json.loads(flow.request.get_text() or "{}")
+    except ValueError:
+        request_payload = {}
+
+    try:
+        response_payload = json.loads(_response_text(flow) or "{}")
+    except ValueError:
+        response_payload = {}
+
+    from_account = str(request_payload.get("fromAccountId", "?"))
+    to_account = str(request_payload.get("toAccountId", "?"))
+    amount = str(request_payload.get("amount", "?"))
+
+    _send_async(
+        {
+            "type": "transfer-intercepted",
+            "sourceIp": source_ip,
+            "targetIp": target_ip,
+            "summary": f"Transferencia interceptada: {from_account} -> {to_account} (${amount})",
+            "detail": {
+                "fromAccountId": from_account,
+                "toAccountId": to_account,
+                "amount": amount,
+                "fromBalance": str(response_payload.get("fromBalance", "?")),
+                "toBalance": str(response_payload.get("toBalance", "?")),
+                "statusCode": str(flow.response.status_code if flow.response else "?"),
+            },
         }
     )

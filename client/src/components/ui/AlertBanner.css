@@ -16,3 +16,9 @@
   color: #92400e;
   border: 1px solid #fde68a;
 }
+
+.alert-banner--success {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}

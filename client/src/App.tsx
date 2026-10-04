@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { FetchHttpClient } from "./services/httpClient";
 import { HttpAuthService } from "./services/AuthService";
 import { HttpProfileService } from "./services/ProfileService";
+import { HttpTransferService } from "./services/TransferService";
 import { AuthProvider } from "./context/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { HomePage } from "./pages/HomePage";
@@ -16,6 +17,7 @@ import { env } from "./config/env";
 const httpClient = new FetchHttpClient(env.apiBaseUrl);
 const authService = new HttpAuthService(httpClient);
 const profileService = new HttpProfileService(httpClient);
+const transferService = new HttpTransferService(httpClient);
 
 export function App() {
   return (
@@ -23,7 +25,10 @@ export function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/home" element={<HomePage profileService={profileService} />} />
+          <Route
+            path="/home"
+            element={<HomePage profileService={profileService} transferService={transferService} />}
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

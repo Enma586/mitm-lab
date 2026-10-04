@@ -25,6 +25,20 @@ VirtualBox (red interna aislada 192.168.56.0/24)
 La app es intencionalmente vulnerable: el login viaja por HTTP plano para que
 el trafico pueda interceptarse. No usar credenciales reales en el laboratorio.
 
+Las 3 VMs arrancan con ventana de VirtualBox visible (`vb.gui = true`) y
+escritorio XFCE con autologin del usuario `vagrant` (login grafico sin
+contraseña). Esto permite:
+
+- En `client`: navegar la app "victima" de verdad desde Firefox dentro de la
+  VM (trafico 100% real), en vez de simular el login con `curl`.
+- En `kali`: correr `start-attack.sh` y abrir Wireshark/mitmproxy con
+  interfaz grafica directamente en la ventana de la VM, sin depender de SSH
+  desde el host.
+
+Por eso tambien subio la RAM asignada: `client` paso de 1536 MB/1 CPU a
+2048 MB/2 CPU, y `kali` de 2048 MB a 3072 MB/2 CPU (el escritorio XFCE +
+Firefox + herramientas de ataque necesitan mas margen que la consola sola).
+
 ## Almacenamiento de las VMs
 
 Todo el disco y el estado de las maquinas virtuales vive en `D:\VM`, no en
@@ -64,9 +78,11 @@ Esto crea las 3 VMs y ejecuta automaticamente:
 - `ansible/server.yml` en `server` -> instala Docker, construye y levanta el
   backend (puerto 4000).
 - `ansible/client.yml` en `client` -> instala Docker, construye y levanta el
-  frontend (puerto 80).
+  frontend (puerto 80), y ademas instala escritorio XFCE + Firefox (snap)
+  con autologin, para navegar la app desde dentro de la VM.
 - `ansible/kali.yml` en `kali` -> instala arpspoof, Wireshark, mitmproxy,
-  tcpdump y habilita el reenvio de paquetes.
+  tcpdump, habilita el reenvio de paquetes, e instala escritorio XFCE con
+  autologin para correr el ataque con interfaz grafica.
 
 Todo eso (instalar Ansible, `apt update`, Docker, `docker build`) pasa
 **solo la primera vez** que se crea cada VM. Una vez creadas, prender y
@@ -138,6 +154,31 @@ vagrant snapshot restore server server-listo
 Para detener el ataque: `Ctrl+C` en la sesion donde corre el script (limpia
 el ARP spoofing automaticamente).
 
+## Escenario de transferencia (Fase 7)
+
+Ademas del login, el backend expone `POST /api/transfer` para simular una
+transferencia entre dos cuentas de prueba en memoria (`acc-alice`,
+`acc-bob`, saldo inicial 1000/500) y tener trafico interesante que
+interceptar mas alla de las credenciales.
+
+Para dispararla, nada de `curl`: una vez logueado en la app (`http://
+192.168.56.10` desde el navegador), la pantalla de inicio tiene un
+formulario **"Transferir fondos"** (elegir cuenta origen, cuenta destino,
+monto). El navegador manda el `POST /api/transfer` como trafico real, igual
+que el login por el formulario de la pantalla anterior.
+
+Responde `{ fromAccountId, toAccountId, amount, fromBalance, toBalance }`, o
+un `400` si falta algun campo, las cuentas son la misma, no existen, o el
+saldo no alcanza (el formulario lo muestra como banner verde/rojo).
+
+Con el ataque de la seccion anterior corriendo, `mitm_bridge.py` reconoce
+este endpoint y espera tambien la respuesta (no solo el request) para
+mandar un evento `transfer-intercepted` con el monto y los saldos
+resultantes, todo interceptado en texto plano. En el dashboard esto se ve
+en la seccion **Transferencias**: cantidad de transferencias capturadas,
+monto total acumulado, su evolucion en el tiempo, y un diagrama de flujo
+(origen -> monto -> destino) por cada transferencia interceptada.
+
 ## Dashboard en vivo
 
 El dashboard corre en tu propia maquina (no dentro de una VM), y se conecta
@@ -181,7 +222,7 @@ mitm-lab/
 │       ├── domain/          # tipo AttackEvent + selectors.ts (funciones puras)
 │       ├── services/        # EventsService (REST) y RealtimeEventSource (WebSocket)
 │       ├── components/ui/   # Card, LineChart, RadialGauge, etc. - todo propio, sin librerias
-│       └── features/        # Resumen, Hosts, Distribucion, Exposicion, Hallazgos
+│       └── features/        # Resumen, Hosts, Distribucion, Transferencias, Exposicion, Hallazgos
 └── scripts/
     ├── start-attack.sh      # arpspoof + iptables + mitmproxy transparente, para correr en Kali
     └── mitm_bridge.py       # addon de mitmproxy: manda lo interceptado a POST /api/events

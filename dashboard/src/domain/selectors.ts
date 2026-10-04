@@ -13,6 +13,7 @@ export function countByType(events: AttackEvent[]): Record<AttackEventType, numb
     "http-credentials": 0,
     "http-request": 0,
     "token-replay": 0,
+    "transfer-intercepted": 0,
   };
   for (const event of events) {
     counts[event.type] += 1;
@@ -71,6 +72,7 @@ export function bucketCounts(events: AttackEvent[], buckets: number): number[] {
 const EXPOSURE_WEIGHTS: Partial<Record<AttackEventType, number>> = {
   "http-credentials": 40,
   "token-replay": 22,
+  "transfer-intercepted": 15,
   "http-request": 2,
 };
 
@@ -89,5 +91,47 @@ export function latestFindings(events: AttackEvent[], limit: number): AttackEven
 }
 
 export function isSensitive(type: AttackEventType): boolean {
-  return type === "http-credentials" || type === "token-replay";
+  return type === "http-credentials" || type === "token-replay" || type === "transfer-intercepted";
+}
+
+function transferAmount(event: AttackEvent): number {
+  const amount = Number(event.detail?.amount);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+export function transferEvents(events: AttackEvent[]): AttackEvent[] {
+  return events.filter((event) => event.type === "transfer-intercepted");
+}
+
+/**
+ * Monto total interceptado en transferencias, para el StatBlock de
+ * "$X capturados en este ataque" (Fase 7 del roadmap).
+ */
+export function totalTransferred(events: AttackEvent[]): number {
+  return transferEvents(events).reduce((total, event) => total + transferAmount(event), 0);
+}
+
+/**
+ * Igual que bucketCounts, pero acumulando montos en vez de conteos:
+ * sirve para dibujar el monto interceptado en el tiempo con el mismo
+ * LineChart que ya usa el resto del dashboard.
+ */
+export function transferAmountTimeline(events: AttackEvent[], buckets: number): number[] {
+  const transfers = transferEvents(events);
+  if (transfers.length === 0) {
+    return new Array(buckets).fill(0);
+  }
+
+  const perBucket = new Array(buckets).fill(0);
+  const step = transfers.length / buckets;
+  transfers.forEach((event, index) => {
+    const bucketIndex = Math.min(buckets - 1, Math.floor(index / step));
+    perBucket[bucketIndex] += transferAmount(event);
+  });
+
+  let cumulative = 0;
+  return perBucket.map((amount) => {
+    cumulative += amount;
+    return cumulative;
+  });
 }

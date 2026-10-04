@@ -25,3 +25,21 @@ body {
   flex-direction: column;
   gap: 0.5rem;
 }
+
+.transfer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.transfer-form__row {
+  display: flex;
+  gap: 1rem;
+}
+
+.transfer-form__row > * {
+  flex: 1;
+}

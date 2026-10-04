@@ -22,6 +22,9 @@ function sublabel(events: AttackEvent[]): string {
   if (counts["token-replay"] > 0) {
     return "Token de sesion reusable detectado";
   }
+  if (counts["transfer-intercepted"] > 0) {
+    return "Transferencia con montos y saldos interceptada";
+  }
   if (events.length > 0) {
     return "Solo trafico generico interceptado por ahora";
   }

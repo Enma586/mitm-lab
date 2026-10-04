@@ -1,6 +1,6 @@
 import "./AlertBanner.css";
 
-type AlertVariant = "error" | "warning";
+type AlertVariant = "error" | "warning" | "success";
 
 interface AlertBannerProps {
   variant?: AlertVariant;

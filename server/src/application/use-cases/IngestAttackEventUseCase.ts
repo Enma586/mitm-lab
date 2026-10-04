@@ -10,6 +10,7 @@ const VALID_TYPES: AttackEventType[] = [
   "http-credentials",
   "http-request",
   "token-replay",
+  "transfer-intercepted",
 ];
 
 export interface IngestAttackEventInput {
