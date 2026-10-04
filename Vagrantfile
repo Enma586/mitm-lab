@@ -34,6 +34,9 @@ Vagrant.configure("2") do |config|
       vb.name = "mitm-lab-server"
       vb.memory = 2048
       vb.cpus = 2
+      # Ventana de VirtualBox visible (no headless): permite ver la
+      # consola de la VM y loguearse ahi (vagrant/vagrant) sin SSH.
+      vb.gui = true
       # NIC virtio en vez del e1000 por defecto: con Hyper-V/WSL2 activo
       # en el host, el e1000 emulado se cuelga apenas arranca la red.
       vb.customize ["modifyvm", :id, "--nictype1", "virtio", "--nictype2", "virtio"]
@@ -63,8 +66,12 @@ Vagrant.configure("2") do |config|
 
     client.vm.provider "virtualbox" do |vb|
       vb.name = "mitm-lab-client"
-      vb.memory = 1536
-      vb.cpus = 1
+      vb.memory = 2048
+      vb.cpus = 2
+      # Ventana de VirtualBox visible con escritorio XFCE + Firefox
+      # (ansible/client.yml los instala), para navegar la app "victima"
+      # de verdad en vez de simularlo con curl (Fase 7.1 del roadmap).
+      vb.gui = true
       vb.customize ["modifyvm", :id, "--nictype1", "virtio", "--nictype2", "virtio"]
       vb.customize ["modifyvm", :id, "--paravirtprovider", "hyperv"]
     end
@@ -86,11 +93,13 @@ Vagrant.configure("2") do |config|
 
     kali.vm.provider "virtualbox" do |vb|
       vb.name = "mitm-lab-kali"
-      vb.memory = 2048
+      vb.memory = 3072
       vb.cpus = 2
-      # Kali trae escritorio; para el ataque por consola no hace falta,
-      # pero se deja headless off por si se quiere abrir la GUI de Wireshark.
-      vb.gui = false
+      # Ventana de VirtualBox visible con escritorio XFCE (ansible/kali.yml
+      # lo instala si la caja no lo trae): permite correr start-attack.sh
+      # y abrir Wireshark/mitmproxy con interfaz grafica, todo dentro de
+      # la propia VM, sin depender de SSH desde el host.
+      vb.gui = true
       vb.customize ["modifyvm", :id, "--nictype1", "virtio", "--nictype2", "virtio"]
       vb.customize ["modifyvm", :id, "--paravirtprovider", "hyperv"]
     end

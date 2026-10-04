@@ -93,3 +93,67 @@
         -p 0.0.0.0:{{ app_port }}:80
         {{ app_image }}
       changed_when: true
+
+    # -----------------------------------------------------------------
+    # Fase 7.1 del roadmap: escritorio minimo + Firefox para que la
+    # "victima" navegue la app de verdad (tráfico 100% real) desde la
+    # ventana de VirtualBox (vb.gui = true en el Vagrantfile), en vez de
+    # simular el login con curl.
+    # -----------------------------------------------------------------
+    - name: Instalar escritorio XFCE completo
+      # El metapaquete "xfce4" (no solo xfce4-session) trae xfwm4 (window
+      # manager), xfce4-panel y xfdesktop4: sin ellos X arranca pero se ve
+      # una pantalla gris vacia, sin panel ni fondo de escritorio.
+      apt:
+        name:
+          - xfce4
+          - xfce4-terminal
+          - lightdm
+          - snapd
+        state: present
+
+    - name: Esperar a que snapd termine de inicializar
+      command: snap wait system seed.loaded
+      changed_when: false
+
+    - name: Instalar Firefox (snap; Ubuntu 22.04 no trae firefox por apt)
+      command: snap install firefox
+      args:
+        creates: /snap/bin/firefox
+
+    - name: Configurar autologin de vagrant en lightdm (sesion XFCE)
+      copy:
+        dest: /etc/lightdm/lightdm.conf.d/50-autologin.conf
+        mode: "0644"
+        content: |
+          [Seat:*]
+          autologin-user=vagrant
+          autologin-user-timeout=0
+          user-session=xfce
+
+    - name: Arrancar en modo grafico por defecto
+      command: systemctl set-default graphical.target
+      changed_when: true
+
+    - name: Fijar lightdm como gestor de login por defecto
+      # Si gdm3 quedo registrado como default-display-manager, el
+      # ExecStartPre de lightdm.service falla (status=1) y XFCE nunca
+      # arranca: la VM se queda solo con la consola de texto.
+      copy:
+        dest: /etc/X11/default-display-manager
+        content: "/usr/sbin/lightdm\n"
+        mode: "0644"
+
+    - name: Apuntar display-manager.service a lightdm
+      file:
+        src: /lib/systemd/system/lightdm.service
+        dest: /etc/systemd/system/display-manager.service
+        state: link
+        force: true
+
+    - name: Asegurar que lightdm esta habilitado y corriendo
+      systemd:
+        name: lightdm
+        enabled: true
+        state: started
+        daemon_reload: true

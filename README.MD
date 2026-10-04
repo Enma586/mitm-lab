@@ -25,6 +25,20 @@ VirtualBox (red interna aislada 192.168.56.0/24)
 La app es intencionalmente vulnerable: el login viaja por HTTP plano para que
 el trafico pueda interceptarse. No usar credenciales reales en el laboratorio.
 
+Las 3 VMs arrancan con ventana de VirtualBox visible (`vb.gui = true`) y
+escritorio XFCE con autologin del usuario `vagrant` (login grafico sin
+contraseña). Esto permite:
+
+- En `client`: navegar la app "victima" de verdad desde Firefox dentro de la
+  VM (trafico 100% real), en vez de simular el login con `curl`.
+- En `kali`: correr `start-attack.sh` y abrir Wireshark/mitmproxy con
+  interfaz grafica directamente en la ventana de la VM, sin depender de SSH
+  desde el host.
+
+Por eso tambien subio la RAM asignada: `client` paso de 1536 MB/1 CPU a
+2048 MB/2 CPU, y `kali` de 2048 MB a 3072 MB/2 CPU (el escritorio XFCE +
+Firefox + herramientas de ataque necesitan mas margen que la consola sola).
+
 ## Almacenamiento de las VMs
 
 Todo el disco y el estado de las maquinas virtuales vive en `D:\VM`, no en
@@ -64,9 +78,11 @@ Esto crea las 3 VMs y ejecuta automaticamente:
 - `ansible/server.yml` en `server` -> instala Docker, construye y levanta el
   backend (puerto 4000).
 - `ansible/client.yml` en `client` -> instala Docker, construye y levanta el
-  frontend (puerto 80).
+  frontend (puerto 80), y ademas instala escritorio XFCE + Firefox (snap)
+  con autologin, para navegar la app desde dentro de la VM.
 - `ansible/kali.yml` en `kali` -> instala arpspoof, Wireshark, mitmproxy,
-  tcpdump y habilita el reenvio de paquetes.
+  tcpdump, habilita el reenvio de paquetes, e instala escritorio XFCE con
+  autologin para correr el ataque con interfaz grafica.
 
 Todo eso (instalar Ansible, `apt update`, Docker, `docker build`) pasa
 **solo la primera vez** que se crea cada VM. Una vez creadas, prender y
